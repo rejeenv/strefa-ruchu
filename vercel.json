@@ -1,1 +1,7 @@
-
+{
+  "functions": {
+    "api/activate.py": {
+      "maxDuration": 30
+    }
+  }
+}
