@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strona w budowie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing: border-box; margin: 0; padding: 0; }
+  html, body{ height: 100%; }
+  body{
+    background: #050608;
+    color: #eef1f6;
+    font-family: 'Newsreader', serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .frame{
+    position: relative;
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .tick{
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid #3d78e0;
+  }
+  .tick.tl{ top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .tick.tr{ top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .tick.bl{ bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .tick.br{ bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .box{
+    border: 1px solid #24406e;
+    padding: 56px 44px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(61,120,224,0.045), rgba(61,120,224,0) 60%);
+  }
+
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #6f92d1;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .eyebrow::before,
+  .eyebrow::after{
+    content: '';
+    width: 18px;
+    height: 1px;
+    background: #24406e;
+  }
+
+  h1{
+    font-weight: 500;
+    font-size: clamp(24px, 4.2vw, 30px);
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    color: #f4f6fa;
+  }
+
+  h1 em{
+    font-style: italic;
+    color: #6f92d1;
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="tick tl"></div>
+  <div class="tick tr"></div>
+  <div class="tick bl"></div>
+  <div class="tick br"></div>
+  <div class="box">
+    <div class="eyebrow">Status</div>
+    <h1>Strona jest<br><em>w trakcie budowy</em></h1>
+  </div>
+</div>
+
+</body>
+</html>
