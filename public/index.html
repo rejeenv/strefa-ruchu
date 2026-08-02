@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Key Activator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+    h1 { margin: 0 0 1.5rem; font-size: 1.5rem; text-align: center; }
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #22c55e;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .msg { margin-top: 1rem; text-align: center; font-size: 14px; }
+    .error { color: #f87171; }
+    .success { color: #4ade80; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>🔑 Aktywacja klucza</h1>
+    <input type="text" id="key" placeholder="NFA-XXXX..." autocomplete="off">
+    <button id="btn" onclick="activate()">Aktywuj i pobierz</button>
+    <div id="msg" class="msg"></div>
+  </div>
 
+  <script>
+    async function activate() {
+      const key = document.getElementById("key").value.trim();
+      const btn = document.getElementById("btn");
+      const msg = document.getElementById("msg");
+
+      if (!key) {
+        msg.className = "msg error";
+        msg.textContent = "Podaj klucz";
+        return;
+      }
+
+      btn.disabled = true;
+      msg.className = "msg";
+      msg.textContent = "Ładowanie...";
+
+      try {
+        const res = await fetch("/api/activate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key })
+        });
+
+        if (res.ok && res.headers.get("content-type")?.includes("octet-stream")) {
+          const blob = await res.blob();
+          const filename = res.headers.get("content-disposition")?.match(/filename="(.+)"/)?.[1] || "loader.exe";
+          
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+
+          msg.className = "msg success";
+          msg.textContent = "Plik pobrany!";
+        } else {
+          const data = await res.json();
+          msg.className = "msg error";
+          msg.textContent = data.error || "Błąd aktywacji";
+        }
+      } catch (e) {
+        msg.className = "msg error";
+        msg.textContent = "Błąd połączenia: " + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
