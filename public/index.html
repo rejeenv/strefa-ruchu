@@ -150,6 +150,39 @@
       font-size: 13px;
       user-select: all;
     }
+
+    /* Footer island */
+    .footer-island {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: 0.25s;
+    }
+
+    .footer-island:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(178,10,44,0.6);
+      border-color: rgba(178,10,44,0.6);
+    }
+
+    .footer-island a {
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .footer-island span {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 4px;
+    }
   </style>
 </head>
 
@@ -177,6 +210,14 @@
         <button class="action blue" id="btn-replace" onclick="doReplace()">Check / Replace</button>
         <div id="msg-replace" class="msg"></div>
       </div>
+    </div>
+
+    <!-- Footer Island -->
+    <div class="footer-island">
+      <a href="https://nfaground.cc" target="_blank">
+        Visit our store
+        <span>nfaground.cc</span>
+      </a>
     </div>
   </div>
 
