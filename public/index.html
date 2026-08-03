@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Key Activator</title>
+  <title>NFA Panel</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -14,16 +14,45 @@
       align-items: center;
       min-height: 100vh;
       margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     .box {
       background: #1a1a1a;
-      padding: 2rem;
+      padding: 1.75rem;
       border-radius: 12px;
-      width: 100%;
-      max-width: 420px;
       box-shadow: 0 0 40px rgba(0,0,0,0.5);
     }
-    h1 { margin: 0 0 1.5rem; font-size: 1.5rem; text-align: center; }
+    h1 { margin: 0 0 0.25rem; font-size: 1.4rem; text-align: center; }
+    .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 1.25rem; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #333;
+      background: #111;
+      color: #aaa;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .tab.active {
+      background: #22c55e;
+      color: #000;
+      border-color: #22c55e;
+    }
     input {
       width: 100%;
       padding: 14px;
@@ -35,7 +64,7 @@
       margin-bottom: 12px;
       box-sizing: border-box;
     }
-    button {
+    button.action {
       width: 100%;
       padding: 14px;
       background: #22c55e;
@@ -46,25 +75,65 @@
       font-weight: 600;
       cursor: pointer;
     }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .msg { margin-top: 1rem; text-align: center; font-size: 14px; }
+    button.action:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.action.blue { background: #3b82f6; color: #fff; }
+    .msg { margin-top: 1rem; text-align: center; font-size: 14px; line-height: 1.4; }
     .error { color: #f87171; }
     .success { color: #4ade80; }
+    .info { color: #93c5fd; }
+    .key-box {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 13px;
+      user-select: all;
+    }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>🔑 Activate Key</h1>
-    <input type="text" id="key" placeholder="NFA-XXXX..." autocomplete="off">
-    <button id="btn" onclick="activate()">Activate</button>
-    <div id="msg" class="msg"></div>
+  <div class="container">
+    <div class="box">
+      <h1>🔥 NFA Panel</h1>
+      <div class="subtitle">Aktywacja i wymiana kont</div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('activate')">🔑 Activate</button>
+        <button class="tab" onclick="switchTab('replace')">🔄 Replace</button>
+      </div>
+
+      <!-- ACTIVATE -->
+      <div id="panel-activate">
+        <input type="text" id="key-activate" placeholder="NFA-XXXX..." autocomplete="off">
+        <button class="action" id="btn-activate" onclick="doActivate()">Aktywuj i pobierz .exe</button>
+        <div id="msg-activate" class="msg"></div>
+      </div>
+
+      <!-- REPLACE -->
+      <div id="panel-replace" style="display:none">
+        <input type="text" id="key-replace" placeholder="NFA-XXXX..." autocomplete="off">
+        <button class="action blue" id="btn-replace" onclick="doReplace()">Sprawdź / Replace</button>
+        <div id="msg-replace" class="msg"></div>
+      </div>
+    </div>
   </div>
 
   <script>
-    async function activate() {
-      const key = document.getElementById("key").value.trim();
-      const btn = document.getElementById("btn");
-      const msg = document.getElementById("msg");
+    function switchTab(tab) {
+      document.getElementById("panel-activate").style.display = tab === "activate" ? "block" : "none";
+      document.getElementById("panel-replace").style.display = tab === "replace" ? "block" : "none";
+      document.querySelectorAll(".tab").forEach((t, i) => {
+        t.classList.toggle("active", (i === 0 && tab === "activate") || (i === 1 && tab === "replace"));
+      });
+    }
+
+    async function doActivate() {
+      const key = document.getElementById("key-activate").value.trim();
+      const btn = document.getElementById("btn-activate");
+      const msg = document.getElementById("msg-activate");
 
       if (!key) {
         msg.className = "msg error";
@@ -86,20 +155,70 @@
         if (res.ok && res.headers.get("content-type")?.includes("octet-stream")) {
           const blob = await res.blob();
           const filename = res.headers.get("content-disposition")?.match(/filename="(.+)"/)?.[1] || "loader.exe";
-          
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
           a.download = filename;
           a.click();
           URL.revokeObjectURL(url);
-
           msg.className = "msg success";
           msg.textContent = "Plik pobrany!";
         } else {
           const data = await res.json();
           msg.className = "msg error";
           msg.textContent = data.error || "Błąd aktywacji";
+        }
+      } catch (e) {
+        msg.className = "msg error";
+        msg.textContent = "Błąd połączenia: " + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function doReplace() {
+      const key = document.getElementById("key-replace").value.trim();
+      const btn = document.getElementById("btn-replace");
+      const msg = document.getElementById("msg-replace");
+
+      if (!key) {
+        msg.className = "msg error";
+        msg.textContent = "Podaj klucz";
+        return;
+      }
+
+      btn.disabled = true;
+      msg.className = "msg";
+      msg.textContent = "Sprawdzanie...";
+
+      try {
+        const res = await fetch("/api/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.className = "msg error";
+          msg.textContent = data.error || "Błąd";
+          return;
+        }
+
+        if (data.status === "valid") {
+          msg.className = "msg success";
+          msg.innerHTML = "✅ <b>Konto działa</b><br>" + (data.message || "");
+        } else if (data.status === "replaced") {
+          msg.className = "msg info";
+          msg.innerHTML = `
+            🔄 <b>Wydano nowy klucz!</b><br>
+            ${data.message || ""}
+            <div class="key-box">${data.replacement_key}</div>
+          `;
+        } else {
+          msg.className = "msg error";
+          msg.innerHTML = `🔴 Status: <b>${data.status}</b><br>${data.message || ""}`;
         }
       } catch (e) {
         msg.className = "msg error";
