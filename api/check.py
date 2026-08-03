@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler
 import json
 import requests
 
-API_KEY = "TWÓJ_API_KEY"  # ten sam co w activate.py
+API_KEY = "f300ffb3-c3db-4baf-bc87-ef1be31c5c34"  # ten sam co w activate.py
 BASE_URL = "https://nfa-api.acode.ing/api/v1"
 HEADERS = {
     "X-API-Key": API_KEY,
