@@ -1,1 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFA Panel</title>
 
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #fffbd5, #b20a2c);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .box {
+      background: rgba(15, 15, 15, 0.85);
+      backdrop-filter: blur(14px);
+      padding: 1.8rem;
+      border-radius: 14px;
+      box-shadow: 0 10px 50px rgba(0,0,0,0.6);
+    }
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.5rem;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin-bottom: 1.3rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.3rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #333;
+      background: #111;
+      color: #aaa;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+
+    .tab:hover {
+      border-color: #b20a2c;
+      color: #fff;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #ff6a6a, #b20a2c);
+      color: #fff;
+      border: none;
+      box-shadow: 0 0 12px rgba(178,10,44,0.6);
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #b20a2c;
+      box-shadow: 0 0 8px rgba(178,10,44,0.5);
+    }
+
+    button.action {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ff6a6a, #b20a2c);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 0 10px rgba(178,10,44,0.5);
+    }
+
+    button.action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(178,10,44,0.8);
+    }
+
+    button.action.blue {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      box-shadow: 0 0 10px rgba(0,242,254,0.6);
+    }
+
+    button.action.blue:hover {
+      box-shadow: 0 0 18px rgba(0,242,254,0.9);
+    }
+
+    button.action:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .msg {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .error { color: #ff7b7b; }
+    .success { color: #4ade80; }
+    .info { color: #7dd3fc; }
+
+    .key-box {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 13px;
+      user-select: all;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="box">
+      <h1>🔥 NFA Panel</h1>
+      <div class="subtitle">Activation & Account Replacement</div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('activate')">🔑 Activate</button>
+        <button class="tab" onclick="switchTab('replace')">🔄 Replace</button>
+      </div>
+
+      <!-- ACTIVATE -->
+      <div id="panel-activate">
+        <input type="text" id="key-activate" placeholder="NFA-XXXX..." autocomplete="off">
+        <button class="action" id="btn-activate" onclick="doActivate()">Activate & Download .exe</button>
+        <div id="msg-activate" class="msg"></div>
+      </div>
+
+      <!-- REPLACE -->
+      <div id="panel-replace" style="display:none">
+        <input type="text" id="key-replace" placeholder="NFA-XXXX..." autocomplete="off">
+        <button class="action blue" id="btn-replace" onclick="doReplace()">Check / Replace</button>
+        <div id="msg-replace" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      document.getElementById("panel-activate").style.display = tab === "activate" ? "block" : "none";
+      document.getElementById("panel-replace").style.display = tab === "replace" ? "block" : "none";
+
+      document.querySelectorAll(".tab").forEach((t, i) => {
+        t.classList.toggle("active",
+          (i === 0 && tab === "activate") ||
+          (i === 1 && tab === "replace")
+        );
+      });
+    }
+
+    async function doActivate() {
+      const key = document.getElementById("key-activate").value.trim();
+      const btn = document.getElementById("btn-activate");
+      const msg = document.getElementById("msg-activate");
+
+      if (!key) {
+        msg.className = "msg error";
+        msg.textContent = "Enter your key";
+        return;
+      }
+
+      btn.disabled = true;
+      msg.textContent = "Loading...";
+
+      try {
+        const res = await fetch("/api/activate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key })
+        });
+
+        if (res.ok && res.headers.get("content-type")?.includes("octet-stream")) {
+          const blob = await res.blob();
+          const filename = res.headers.get("content-disposition")?.match(/filename="(.+)"/)?.[1] || "loader.exe";
+
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+
+          msg.className = "msg success";
+          msg.textContent = "Download started!";
+        } else {
+          const data = await res.json();
+          msg.className = "msg error";
+          msg.textContent = data.error || "Activation failed";
+        }
+      } catch (e) {
+        msg.className = "msg error";
+        msg.textContent = "Connection error: " + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function doReplace() {
+      const key = document.getElementById("key-replace").value.trim();
+      const btn = document.getElementById("btn-replace");
+      const msg = document.getElementById("msg-replace");
+
+      if (!key) {
+        msg.className = "msg error";
+        msg.textContent = "Enter your key";
+        return;
+      }
+
+      btn.disabled = true;
+      msg.textContent = "Checking...";
+
+      try {
+        const res = await fetch("/api/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.className = "msg error";
+          msg.textContent = data.error || "Error";
+          return;
+        }
+
+        if (data.status === "valid") {
+          msg.className = "msg success";
+          msg.innerHTML = "✅ <b>Account is working</b><br>" + (data.message || "");
+        } else if (data.status === "replaced") {
+          msg.className = "msg info";
+          msg.innerHTML = `
+            🔄 <b>New key issued!</b><br>
+            ${data.message || ""}
+            <div class="key-box">${data.replacement_key}</div>
+          `;
+        } else {
+          msg.className = "msg error";
+          msg.innerHTML = `🔴 Status: <b>${data.status}</b><br>${data.message || ""}`;
+        }
+      } catch (e) {
+        msg.className = "msg error";
+        msg.textContent = "Connection error: " + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
