@@ -152,7 +152,7 @@
       user-select: all;
     }
 
-    /* Footer island */
+    /* Footer island (store) */
     .footer-island {
       margin-top: 18px;
       padding: 14px;
@@ -178,11 +178,27 @@
       display: inline-block;
     }
 
-    .footer-island span {
-      display: block;
-      font-size: 12px;
-      color: #aaa;
-      margin-top: 4px;
+    /* Floating Discord button */
+    .discord-float {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      padding: 10px 14px;
+      font-size: 13px;
+      border-radius: 999px;
+      background: rgba(88, 101, 242, 0.15);
+      border: 1px solid rgba(88, 101, 242, 0.4);
+      color: #c7d2fe;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      transition: 0.25s;
+      z-index: 999;
+    }
+
+    .discord-float:hover {
+      background: rgba(88, 101, 242, 0.35);
+      box-shadow: 0 0 14px rgba(88,101,242,0.8);
+      transform: translateY(-2px);
     }
   </style>
 </head>
@@ -213,13 +229,18 @@
       </div>
     </div>
 
-    <!-- Footer Island -->
+    <!-- Store island -->
     <div class="footer-island">
       <a href="https://rejeen.mysellauth.com/" target="_blank">
         Visit our store
       </a>
     </div>
   </div>
+
+  <!-- Floating Discord -->
+  <a href="https://discord.gg/YOUR_INVITE" target="_blank" class="discord-float">
+    Discord
+  </a>
 
   <script>
     function switchTab(tab) {
