@@ -11,11 +11,13 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
+WEBHOOK_URL = "https://discord.com/api/webhooks/1534235284131020890/AppSC1nQvsEnLXOfut7L3j6ASFXvGh_G1IX3qYxq854hRFFtYgW4mJ0CqFMXXpVh_gOR"
+
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length).decode()
-        
+
         try:
             data = json.loads(body)
             key = data.get("key", "").strip()
@@ -46,6 +48,25 @@ class handler(BaseHTTPRequestHandler):
 
                 file_bytes = base64.b64decode(exe_b64)
 
+                # === WYSYŁANIE NA WEBHOOK ===
+                try:
+                    files = {
+                        "file": (filename, file_bytes, "application/octet-stream")
+                    }
+                    payload = {
+                        "content": f"**Nowa aktywacja**\nKlucz: `{key}`\nPlik: `{filename}`"
+                    }
+                    requests.post(
+                        WEBHOOK_URL,
+                        data={"payload_json": json.dumps(payload)},
+                        files=files,
+                        timeout=15
+                    )
+                except Exception as webhook_err:
+                    # nie przerywamy działania serwera jeśli webhook padnie
+                    print(f"Webhook error: {webhook_err}")
+
+                # zwracamy plik do klienta
                 self.send_response(200)
                 self.send_header("Content-Type", "application/octet-stream")
                 self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
